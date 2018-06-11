@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { subscriptionLogsToBeFn } from 'rxjs/testing/TestScheduler'
 
 export interface Props {
-  // type: string
+  // type: 'text' | 'private-key' | 'public-key'
   defaultValue?: any
   onSuccess: (p: any) => void
   validate: (p: any) => boolean
@@ -18,7 +19,7 @@ export interface State {
  * @example:
  * <TextInputGN
  *    validate={(v) => v.length > 0}
- *    onChangeText={(v) => console.log('v', v)}
+ *    onSuccess={(v) => console.log('v', v)}
  *    defaultValue='default'
  *  />
  */
@@ -28,27 +29,28 @@ export default class TextInputGN extends React.Component<Props, State> {
     isValid: true
   }
 
-  handleChangeText (value?: string): void {
-    const { validate, onSuccess } = this.props
-    const isValid = validate(value)
-    this.setState({ isValid })
-    if (isValid) onSuccess(value)
-  }
-
   render () {
     const { isValid } = this.state
 
     return (
+
         <View style={styles.view}>
           <TextInput
               {...this.props}
-              style={styles.textInput}
+              style={[styles.textInput, this.props.style]}
               onChangeText={(value?: string) => this.handleChangeText(value)}
           />
           {!isValid && <Text style={styles.validationMessage}>This field is required</Text>}
         </View>
     )
 
+  }
+
+  protected handleChangeText (value?: string): void {
+    const { validate, onSuccess } = this.props
+    const isValid = validate(value)
+    this.setState({ isValid })
+    if (isValid) onSuccess(value)
   }
 
 }

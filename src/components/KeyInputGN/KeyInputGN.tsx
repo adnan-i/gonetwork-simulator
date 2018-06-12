@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { StyleSheet, View, Button, Text, TextInput } from 'react-native'
 import TextInputGN from '../TextInputGN/TextInputGN'
-import Icon from 'react-native-vector-icons/FontAwesome'
+import { Icon } from 'react-native-elements'
+import QRScan, { ScanStatus } from '../KeyQRScanner'
 
 export interface Props {
   defaultValue?: string
@@ -9,6 +10,11 @@ export interface Props {
   validate: (p: any) => boolean
 
   [name: string]: any
+}
+
+export interface State {
+  QRScanModalVisible: boolean
+  value?: string
 }
 
 
@@ -20,32 +26,66 @@ export interface Props {
  *    defaultValue='default'
  *  />
  */
-export default class KeyInputGN extends React.Component<Props> {
+export default class KeyInputGN extends React.Component<Props, State> {
+  state: State = {
+    QRScanModalVisible: false
+  }
 
   render () {
+    const { QRScanModalVisible, value } = this.state
+    console.log('KeyInputGN state.value is: ', value)
 
     return (
-        <View style={{ flex: 1 }}>
+        <View>
+
           <View style={styles.inputGroup}>
             <TextInputGN
+                {...this.props}
                 style={styles.textInput}
                 onSuccess={this.props.onSuccess}
                 validate={this.props.validate}
+                defaultValue={this.props.defaultValue}
             />
-            <Button
+            <Icon
+                name="camera-alt"
+                size={15}
+                raised
                 onPress={this.onButtonPress}
-                title="Press me"
-            >
-              {/*<Icon name="camera" size={30} color="#900" />*/}
-            </Button>
+            />
           </View>
+
+          {
+            QRScanModalVisible
+            &&
+            <QRScan
+                scanFor="private"
+                onDone={this.onScanDone}
+                mockConfig={{
+                  probabilityOfKey: 0.5,
+                  waitForMs: 1000
+                }}
+            />
+          }
+
         </View>
     )
 
   }
 
-  protected onButtonPress (): void {
-    console.log('pressed')
+  protected onScanDone = (scanStatus: ScanStatus, key?: string): void => {
+    // console.log('onScanDone', scanStatus, key)
+
+    this.setState({ QRScanModalVisible: false })
+    if (scanStatus !== 'success') return
+
+    if (this.props.validate(key)) {
+      this.props.onSuccess(key)
+      this.setState({ value: key })
+    }
+  }
+
+  protected onButtonPress = (): void => {
+    this.setState({ QRScanModalVisible: true })
   }
 
 }
@@ -54,14 +94,10 @@ const styles = StyleSheet.create({
   inputGroup: {
     flexDirection: 'row',
     height: 60,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10
+    padding: 10,
   },
   textInput: {
-    flex: 3,
-    borderColor: 'gray',
-    borderWidth: 1
+    flex: 3
   }
 })
 

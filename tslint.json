@@ -3,7 +3,8 @@
   "extends": "tslint-config-standard",
   "jsRules": {},
   "rules": {
-    "quotemark": [true, "single", "jsx-double"]
+    "quotemark": [true, "single", "jsx-double"],
+    "trailing-comma": false
   },
   "rulesDirectory": []
 }

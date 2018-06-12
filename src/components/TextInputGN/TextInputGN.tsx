@@ -4,15 +4,18 @@ import { subscriptionLogsToBeFn } from 'rxjs/testing/TestScheduler'
 
 export interface Props {
   // type: 'text' | 'private-key' | 'public-key'
-  defaultValue?: any
+  defaultValue?: string
+  value?: string
   onSuccess: (p: any) => void
   validate: (p: any) => boolean
+  style?: object
 
   [name: string]: any
 }
 
 export interface State {
   isValid: boolean
+  value?: string
 }
 
 /**
@@ -20,7 +23,7 @@ export interface State {
  * <TextInputGN
  *    validate={(v) => v.length > 0}
  *    onSuccess={(v) => console.log('v', v)}
- *    defaultValue='default'
+ *    value='default'
  *  />
  */
 export default class TextInputGN extends React.Component<Props, State> {
@@ -29,16 +32,24 @@ export default class TextInputGN extends React.Component<Props, State> {
     isValid: true
   }
 
+  static getDerivedStateFromProps (props, state) {
+    return { value: props.value }
+  }
+
+
   render () {
-    const { isValid } = this.state
+    const { isValid, value } = this.state
+    console.log('TextInputGN state.value:', value)
 
     return (
 
-        <View style={styles.view}>
+        <View style={[styles.view, this.props.style]}>
           <TextInput
               {...this.props}
-              style={[styles.textInput, this.props.style]}
+              style={styles.textInput}
               onChangeText={(value?: string) => this.handleChangeText(value)}
+              value={this.state.value}
+              defaultValue={this.props.defaultValue}
           />
           {!isValid && <Text style={styles.validationMessage}>This field is required</Text>}
         </View>
@@ -49,14 +60,14 @@ export default class TextInputGN extends React.Component<Props, State> {
   protected handleChangeText (value?: string): void {
     const { validate, onSuccess } = this.props
     const isValid = validate(value)
-    this.setState({ isValid })
+    this.setState({ isValid, value })
     if (isValid) onSuccess(value)
   }
 
 }
 
 const styles = StyleSheet.create({
-  view: {},
+  view: { flex: 3 },
   textInput: { height: 40, borderColor: 'gray', borderWidth: 1 },
   validationMessage: { color: 'red' }
 })

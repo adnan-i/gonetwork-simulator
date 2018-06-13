@@ -7,7 +7,7 @@ export interface Props {
   defaultValue?: string
   value?: string
   onSuccess: (p: any) => void
-  validate: (p: any) => boolean
+  validate: (p: any) => Promise<boolean> | boolean
   style?: object
 
   [name: string]: any
@@ -56,10 +56,14 @@ export default class TextInputGN extends React.Component<Props, State> {
 
   }
 
-  protected handleChangeText = (value?: string): void => {
+  protected handleChangeText = async (value?: string): Promise<void> => {
     const { validate, onSuccess } = this.props
-    const isValid = validate(value)
+
+    const isValid = await Promise.resolve(validate(value))
+    console.log('isValid', isValid);
+
     this.setState({ isValid, value })
+
     if (isValid) onSuccess(value)
   }
 

@@ -44,7 +44,7 @@ export default class QRScan extends React.Component<Props, State> {
 
     const valid = scanFor.map(k => {
       if (k === 'private') return util.isValidPrivate(maybeKey) && ev.data
-      else if (k === 'public') return util.isValidPublic(maybeKey) && ev.data
+      else if (k === 'public') return util.isValidAddress(ev.data) && ev.data
     })
         .filter(Boolean)
 

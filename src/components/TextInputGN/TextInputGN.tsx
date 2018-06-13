@@ -3,7 +3,6 @@ import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { subscriptionLogsToBeFn } from 'rxjs/testing/TestScheduler'
 
 export interface Props {
-  // type: 'text' | 'private-key' | 'public-key'
   defaultValue?: string
   value?: string
   onSuccess: (p: any) => void
@@ -60,7 +59,6 @@ export default class TextInputGN extends React.Component<Props, State> {
     const { validate, onSuccess } = this.props
 
     const isValid = await Promise.resolve(validate(value))
-    console.log('isValid', isValid);
 
     this.setState({ isValid, value })
 

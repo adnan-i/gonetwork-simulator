@@ -33,13 +33,12 @@ export default class TextInputGN extends React.Component<Props, State> {
   }
 
   static getDerivedStateFromProps (props, state) {
-    return { value: props.value }
+    return { value: props.value };
   }
 
 
   render () {
     const { isValid, value } = this.state
-    console.log('TextInputGN state.value:', value)
 
     return (
 
@@ -47,8 +46,8 @@ export default class TextInputGN extends React.Component<Props, State> {
           <TextInput
               {...this.props}
               style={styles.textInput}
-              onChangeText={(value?: string) => this.handleChangeText(value)}
-              value={this.state.value}
+              onChangeText={this.handleChangeText}
+              value={value}
               defaultValue={this.props.defaultValue}
           />
           {!isValid && <Text style={styles.validationMessage}>This field is required</Text>}
@@ -57,7 +56,7 @@ export default class TextInputGN extends React.Component<Props, State> {
 
   }
 
-  protected handleChangeText (value?: string): void {
+  protected handleChangeText = (value?: string): void => {
     const { validate, onSuccess } = this.props
     const isValid = validate(value)
     this.setState({ isValid, value })

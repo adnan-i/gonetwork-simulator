@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Modal, Button, View, Text } from 'react-native'
+import { Modal } from 'react-native'
 import { RNCamera, BarCodeType } from 'react-native-camera'
 
 import * as util from 'ethereumjs-util'
@@ -8,22 +8,17 @@ import * as T from '../typings'
 
 export type ScanStatus = 'cancel' | 'fail' | 'mis-match' | 'success'
 
-export type MockConfig = {
-  probabilityOfKey: number
-  waitForMs: number
-}
-
 export interface Props {
-  scanFor?: T.KeyType // by-defualt it will look for both public and private keys
+  scanFor?: T.KeyType // by-default it will look for both public and private keys
   onDone: (s: ScanStatus, k?: string) => void
-  mockConfig?: MockConfig
+  mockConfig?: T.MockConfig
 }
 
 export interface State {
   timeoutId: number
 }
 
-const defaultMockConfig: MockConfig = {
+const defaultMockConfig: T.MockConfig = {
   probabilityOfKey: 0.5,
   waitForMs: 2000,
 }
@@ -32,6 +27,7 @@ const mockKeys = {
   private: '0xc712c08b0c42c073f8c67cf5c0fa8c4cf5ffa89c0b33c2d4e53aa4fe969da887',
   public: '0xF8e9b7b0F5936C0221B56F15ea2182D796d09E63'
 }
+
 
 export default class QRScan extends React.Component<Props, State> {
 
@@ -43,6 +39,7 @@ export default class QRScan extends React.Component<Props, State> {
   // todo: cancel support and/or timeout
   onScan = (ev: { type?: keyof BarCodeType, data: string }) => {
     const scanFor: T.KeyType[] = this.props.scanFor ? [this.props.scanFor] : ['private', 'public']
+
     const maybeKey = util.toBuffer(ev.data)
 
     const valid = scanFor.map(k => {
@@ -89,7 +86,7 @@ export default class QRScan extends React.Component<Props, State> {
     this.onScan({ data: '' })
   }
 
-  private getMockConfig (): MockConfig {
+  private getMockConfig (): T.MockConfig {
     const { mockConfig } = this.props
     return { ...defaultMockConfig, ...(mockConfig || {}) }
   }
@@ -102,7 +99,7 @@ export default class QRScan extends React.Component<Props, State> {
 
     const timeoutId: number = setTimeout(() => {
       const success: boolean = Math.random() < mockConfig.probabilityOfKey
-      this.onScan({ data: randomKey })
+      this.onScan({ data: success ? randomKey : '' })
     }, mockConfig.waitForMs)
 
     this.setState({ timeoutId })

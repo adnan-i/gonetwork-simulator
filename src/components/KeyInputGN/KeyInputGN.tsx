@@ -4,10 +4,14 @@ import TextInputGN from '../TextInputGN/TextInputGN'
 import { Icon } from 'react-native-elements'
 import QRScan, { ScanStatus } from '../KeyQRScanner'
 
+import * as T from '../../typings'
+
 export interface Props {
+  type?: T.KeyType
   defaultValue?: string
   onSuccess: (p: any) => void
   validate: (p: any) => boolean
+  mockConfig?: T.MockConfig
 
   [name: string]: any
 }
@@ -23,7 +27,11 @@ export interface State {
  * <KeyInputGN
  *    validate={(v) => v.length > 0}
  *    onSuccess={(v) => console.log('v', v)}
- *    defaultValue='default'
+ *    type="private"
+ *    mockConfig={{
+ *      probabilityOfKey: 0.8,
+ *      waitForMs: 1000
+ *    }}
  *  />
  */
 export default class KeyInputGN extends React.Component<Props, State> {
@@ -31,9 +39,12 @@ export default class KeyInputGN extends React.Component<Props, State> {
     QRScanModalVisible: false
   }
 
+  static getDerivedStateFromProps (props: Props, state: State): object {
+    return { value: props.value };
+  }
+
   render () {
-    const { QRScanModalVisible, value } = this.state
-    console.log('KeyInputGN state.value is: ', value)
+    const { QRScanModalVisible, value } = this.state;
 
     return (
         <View>
@@ -42,8 +53,9 @@ export default class KeyInputGN extends React.Component<Props, State> {
             <TextInputGN
                 {...this.props}
                 style={styles.textInput}
-                onSuccess={this.props.onSuccess}
+                onSuccess={this.handleOnSuccess}
                 validate={this.props.validate}
+                value={value}
                 defaultValue={this.props.defaultValue}
             />
             <Icon
@@ -58,12 +70,9 @@ export default class KeyInputGN extends React.Component<Props, State> {
             QRScanModalVisible
             &&
             <QRScan
-                scanFor="private"
+                scanFor={this.props.type}
                 onDone={this.onScanDone}
-                mockConfig={{
-                  probabilityOfKey: 0.5,
-                  waitForMs: 1000
-                }}
+                mockConfig={this.props.mockConfig}
             />
           }
 
@@ -72,8 +81,12 @@ export default class KeyInputGN extends React.Component<Props, State> {
 
   }
 
+  protected handleOnSuccess = (value?: string) => {
+    this.setState({ value });
+    this.props.onSuccess(value);
+  }
+
   protected onScanDone = (scanStatus: ScanStatus, key?: string): void => {
-    // console.log('onScanDone', scanStatus, key)
 
     this.setState({ QRScanModalVisible: false })
     if (scanStatus !== 'success') return

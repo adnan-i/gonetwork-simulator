@@ -11,3 +11,8 @@ export interface EthAccount {
 
   lastModified?: Date
 }
+
+export type MockConfig = {
+  probabilityOfKey: number
+  waitForMs: number
+}

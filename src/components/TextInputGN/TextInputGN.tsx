@@ -1,13 +1,16 @@
 import * as React from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
-import { subscriptionLogsToBeFn } from 'rxjs/testing/TestScheduler'
 
 export interface Props {
   defaultValue?: string
   value?: string
-  onSuccess: (p: any) => void
-  validate: (p: any) => Promise<boolean> | boolean
-  style?: object
+  validate?: { (p?: string): boolean };
+  onSuccess?: { (p?: string): any } // Fired only if input passes validation
+  onChangeText?: { (p?: string): any } // Fired on every input change
+  componentStyle?: object
+  textInputStyle?: object
+  validationMessageStyle?: object
+  validationError?: string
 
   [name: string]: any
 }
@@ -27,6 +30,12 @@ export interface State {
  */
 export default class TextInputGN extends React.Component<Props, State> {
 
+  public static defaultProps: Partial<Props> = {
+    validate: (p) => true,
+    onSuccess: (p) => void(0),
+    onChangeText: (p) => void(0),
+  };
+
   state: State = {
     isValid: true
   }
@@ -41,35 +50,44 @@ export default class TextInputGN extends React.Component<Props, State> {
 
     return (
 
-        <View style={[styles.view, this.props.style]}>
+        <View style={[styles.view, this.props.componentStyle]}>
           <TextInput
               {...this.props}
-              style={styles.textInput}
+              style={[styles.textInput, this.props.textInputStyle]}
               onChangeText={this.handleChangeText}
               value={value}
               defaultValue={this.props.defaultValue}
           />
-          {!isValid && <Text style={styles.validationMessage}>This field is required</Text>}
+          {
+            !isValid
+            &&
+            <Text
+                style={[styles.validationMessage, this.props.validationMessageStyle]}
+            >
+              {this.props.validationError || 'This field is required'}
+            </Text>
+          }
         </View>
     )
 
   }
 
   protected handleChangeText = async (value?: string): Promise<void> => {
-    const { validate, onSuccess } = this.props
+    const { validate, onSuccess, onChangeText } = this.props
 
-    const isValid = await Promise.resolve(validate(value))
+    const isValid = await Promise.resolve(validate!(value))
 
     this.setState({ isValid, value })
 
-    if (isValid) onSuccess(value)
+    onChangeText!(value);
+    if (isValid) onSuccess!(value)
   }
 
 }
 
 const styles = StyleSheet.create({
   view: { flex: 3 },
-  textInput: { height: 40, borderColor: 'gray', borderWidth: 1 },
+  textInput: { height: 40, borderColor: 'gray', borderWidth: 1, padding: 10 },
   validationMessage: { color: 'red' }
 })
 

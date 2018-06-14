@@ -9,8 +9,16 @@ import * as T from '../../typings'
 export interface Props {
   type?: T.KeyType
   defaultValue?: string
-  onSuccess: (p: any) => void
-  validate: (p: any) => boolean
+
+  value?: string
+  validate?: { (p?: string): boolean };
+  onSuccess?: { (p?: string): any } // Fired only if input passes validation
+  onChangeText?: { (p?: string): any } // Fired on every input change
+  componentStyle?: object
+  textInputStyle?: object
+  validationMessageStyle?: object
+  validationError?: string
+
   mockConfig?: T.MockConfig
 
   [name: string]: any
@@ -35,16 +43,20 @@ export interface State {
  *  />
  */
 export default class KeyInputGN extends React.Component<Props, State> {
+
+  public static defaultProps: Partial<Props> = {
+    value: '',
+    validate: (p) => true,
+    onSuccess: (p) => void(0),
+    onChangeText: (p) => void(0),
+  };
+
   state: State = {
     QRScanModalVisible: false
   }
 
-  static getDerivedStateFromProps (props: Props, state: State): object {
-    return { value: props.value };
-  }
-
   render () {
-    const { QRScanModalVisible, value } = this.state;
+    const { QRScanModalVisible } = this.state;
 
     return (
         <View>
@@ -53,10 +65,11 @@ export default class KeyInputGN extends React.Component<Props, State> {
             <TextInputGN
                 {...this.props}
                 style={styles.textInput}
-                onSuccess={this.handleOnSuccess}
-                validate={this.props.validate}
-                value={value}
-                defaultValue={this.props.defaultValue}
+                value={this.state.value}
+                onChangeText={(value) => {
+                  this.setState({ value });
+                  this.props.onChangeText!(value);
+                }}
             />
             <Icon
                 name="camera-alt"
@@ -81,20 +94,20 @@ export default class KeyInputGN extends React.Component<Props, State> {
 
   }
 
-  protected handleOnSuccess = (value?: string) => {
-    this.setState({ value });
-    this.props.onSuccess(value);
-  }
-
-  protected onScanDone = (scanStatus: ScanStatus, key?: string): void => {
+  protected onScanDone = (scanStatus: ScanStatus, value?: string): void => {
 
     this.setState({ QRScanModalVisible: false })
+
     if (scanStatus !== 'success') return
 
-    if (this.props.validate(key)) {
-      this.props.onSuccess(key)
-      this.setState({ value: key })
+    this.setState({ value })
+
+    this.props.onChangeText!(value);
+
+    if (this.props.validate!(value)) {
+      this.props.onSuccess!(value);
     }
+
   }
 
   protected onButtonPress = (): void => {

@@ -17,7 +17,6 @@ export interface Props {
 
 export interface State {
   isValid: boolean
-  value?: string
 }
 
 /**
@@ -40,13 +39,14 @@ export default class TextInputGN extends React.Component<Props, State> {
     isValid: true
   }
 
-  static getDerivedStateFromProps (props, state) {
-    return { value: props.value };
+  componentDidUpdate (prevProps: Props) {
+    if (prevProps.value !== this.props.value) {
+      this.handleChangeText(this.props.value);
+    }
   }
 
-
   render () {
-    const { isValid, value } = this.state
+    const { isValid } = this.state
 
     return (
 
@@ -55,8 +55,6 @@ export default class TextInputGN extends React.Component<Props, State> {
               {...this.props}
               style={[styles.textInput, this.props.textInputStyle]}
               onChangeText={this.handleChangeText}
-              value={value}
-              defaultValue={this.props.defaultValue}
           />
           {
             !isValid
@@ -72,12 +70,11 @@ export default class TextInputGN extends React.Component<Props, State> {
 
   }
 
-  protected handleChangeText = async (value?: string): Promise<void> => {
+  private handleChangeText = async (value?: string): Promise<void> => {
     const { validate, onSuccess, onChangeText } = this.props
 
     const isValid = await Promise.resolve(validate!(value))
-
-    this.setState({ isValid, value })
+    this.setState({ isValid })
 
     onChangeText!(value);
     if (isValid) onSuccess!(value)

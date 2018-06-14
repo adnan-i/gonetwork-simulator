@@ -84,7 +84,7 @@ export default class TextInputGN extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   view: { flex: 3 },
-  textInput: { height: 40, borderColor: 'gray', borderWidth: 1, padding: 10 },
+  textInput: { borderColor: '#dddddd', borderWidth: 1, padding: 10 },
   validationMessage: { color: 'red' }
 })
 

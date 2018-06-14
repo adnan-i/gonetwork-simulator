@@ -53,18 +53,22 @@ export default class CoinInputGN extends React.Component<Props, State> {
   }
 
   render () {
-    const { value, weiValue, currency } = this.state;
+    const { value, currency } = this.state;
 
     return (
         <View style={[styles.inputGroup, this.props.style]}>
           <TextInputGN
               {...this.props}
+              keyboardType={`numeric`}
               style={styles.textInput}
               onSuccess={(value?: string) => {
                 this.storeViewValueToState(value);
               }}
-              validate={() => true}
-              value={value && value.toFixed()}
+              validate={this.isValidNumberInput}
+              value={(value && value.toFixed()) || ''}
+              onChangeText={this.handleChangeText}
+
+              validationError="Invalid value"
           />
           <Picker
               mode="dropdown"
@@ -93,6 +97,16 @@ export default class CoinInputGN extends React.Component<Props, State> {
 
   }
 
+  private isValidNumberInput = (value: string = ''): boolean => {
+    const regex = new RegExp('^([0-9]+([.][0-9]*)?|[.][0-9]+)$');
+    return regex.test(value);
+  }
+
+  private handleChangeText = (value?: string): void => {
+    if (this.isValidNumberInput(value)) {
+      this.storeViewValueToState(value);
+    }
+  }
 
   private convertValueToCurrency (
       value?: BigNumber | string | undefined,

@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { StyleSheet, View, Button, Text, TextInput } from 'react-native'
+import { StyleSheet, TextInput, View } from 'react-native'
 import TextInputGN from '../TextInputGN/TextInputGN'
-import { Icon } from 'react-native-elements'
+import { Icon, Button } from 'native-base';
+
 import QRScan, { ScanStatus } from '../KeyQRScanner'
 
 import * as T from '../../typings'
@@ -71,12 +72,13 @@ export default class KeyInputGN extends React.Component<Props, State> {
                   this.props.onChangeText!(value);
                 }}
             />
-            <Icon
-                name="camera-alt"
-                size={15}
-                raised
+            <Button
+                light
+                style={{ marginLeft: 5 }}
                 onPress={this.onButtonPress}
-            />
+            >
+              <Icon name="camera"/>
+            </Button>
           </View>
 
           {
